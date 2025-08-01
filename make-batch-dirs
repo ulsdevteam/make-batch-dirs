@@ -1,0 +1,91 @@
+#!/usr/bin/python3
+import yaml
+import argparse
+import os
+import pwd
+import json
+import sys
+import subprocess
+import shutil
+import logging
+import openpyxl
+import csv
+
+def get_username():
+    return pwd.getpwuid(os.getuid())[0]
+
+def setup_logger(name, log_file, level=logging.DEBUG):
+    """To setup as many loggers as needed"""
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(log_formatter)
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+    return logger
+
+def read_yaml_file(path):
+    with open(path, "r") as stream:
+        return yaml.FullLoader(stream).get_data()
+
+parser = argparse.ArgumentParser(description='Run..')
+parser.add_argument('--config-file', dest="config_file", required=True, help='Config file.')
+parser.add_argument('--xls-file', dest="xls_file", required=True, help='XLS file.')
+parser.add_argument('--batch-name', dest="batch_name", required=False, help='Name of the batch.')
+args = parser.parse_args()
+
+# Set configuration variables from config-file parameter
+username            = get_username()
+cfg                 = read_yaml_file(args.config_file)
+workbench_path      = cfg['workbench_path']
+scanning_path       = cfg['scanning_path']
+python_exe          = cfg['python_exe']
+
+if ( args.batch_name ):
+    batch_name = args.batch_name
+else:
+    batch_name = os.path.splitext(os.path.basename(args.xls_file))[0]
+
+batch_path = scanning_path+"/"+batch_name
+
+print(f"Creating Batch Path: {batch_path}")
+if ( os.path.isdir(batch_path) ):
+    print(f"Error: {batch_path} exists!")
+    exit()
+else:
+    os.mkdir(batch_path)
+
+print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
+shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
+
+print(f"Creating spreadsheet as csv")
+wb = openpyxl.load_workbook(args.xls_file)
+sheetnames = wb.sheetnames
+sheet_value_arr = []
+for a in sheetnames:
+    sheet = wb[a]
+    with open(batch_path+"/manifest.csv", "w") as f:
+        c = csv.writer(f)
+        for row in sheet.rows:
+            sheet_value_arr.append([cell.value for cell in row])
+            #for r in sheet.rows:
+            c.writerow([cell.value for cell in row])
+f.close()
+
+print(f"Reading spreadsheet: {args.xls_file}")
+workbook = openpyxl.load_workbook(args.xls_file)
+dataframe = workbook.active
+
+rows = dataframe.iter_rows()
+next(rows)
+for row in rows:
+    if ((str(row[0].value)) and (str(row[0].value) != "None" )): 
+        id = str(row[0].value)
+        print(f"Creating {batch_path}/{id}")
+        object_path = batch_path + "/" + id
+        try: 
+            os.mkdir(object_path)
+        except OSError as error:
+            print(f"Warning: {batch_path}/{id} - {error}.")
+
+print(f"Batch Path Creation Complete.")
+
