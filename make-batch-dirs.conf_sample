@@ -1,0 +1,12 @@
+#
+# make-batch-dirs config.
+#
+
+# workbench_path - where is your workbench directory.
+workbench_path: 
+
+# scanning_path - where is your scanning directory.
+scanning_path: 
+
+# python_exe - where is your python executable.
+python_exe: /usr/bin/python3
