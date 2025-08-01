@@ -1,0 +1,6 @@
+*.conf
+*.csv
+*.log
+*.json
+*.new
+ignore/
