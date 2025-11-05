@@ -7,6 +7,7 @@ import json
 import sys
 import subprocess
 import shutil
+import sheetutils
 import logging
 import openpyxl
 import csv
@@ -29,8 +30,12 @@ def read_yaml_file(path):
 
 parser = argparse.ArgumentParser(description='Run..')
 parser.add_argument('--config-file', dest="config_file", required=True, help='Config file.')
-parser.add_argument('--xls-file', dest="xls_file", required=True, help='XLS file.')
+parser.add_argument('--xls-file', dest="xls_file", required=False, help='XLS file.')
 parser.add_argument('--batch-name', dest="batch_name", required=False, help='Name of the batch.')
+parser.add_argument('--use-google', dest='use_google', required=False)
+parser.add_argument('--google-sheet-id', dest='google_sheet_id', required=False)
+parser.add_argument('--google-sheet-name', dest='google_sheet_name', required=False)
+parser.add_argument('--google-creds-file', dest='google_sheet_creds', required=False)
 args = parser.parse_args()
 
 # Set configuration variables from config-file parameter
@@ -45,47 +50,72 @@ if ( args.batch_name ):
 else:
     batch_name = os.path.splitext(os.path.basename(args.xls_file))[0]
 
-batch_path = scanning_path+"/"+batch_name
 
-print(f"Creating Batch Path: {batch_path}")
-if ( os.path.isdir(batch_path) ):
-    print(f"Error: {batch_path} exists!")
-    exit()
-else:
-    os.mkdir(batch_path)
+def create_batch_folder(scanning_path, batch_name):
+    batch_path = scanning_path+"/"+batch_name
 
-print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
-shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
+    print(f"Creating Batch Path: {batch_path}")
+    if ( os.path.isdir(batch_path) ):
+        print(f"Error: {batch_path} exists!")
+        exit()
+    else:
+        os.mkdir(batch_path)
+    return batch_path
 
-print(f"Creating spreadsheet as csv")
-wb = openpyxl.load_workbook(args.xls_file)
-sheetnames = wb.sheetnames
-sheet_value_arr = []
-for a in sheetnames:
-    sheet = wb[a]
-    with open(batch_path+"/manifest.csv", "w") as f:
-        c = csv.writer(f)
-        for row in sheet.rows:
-            sheet_value_arr.append([cell.value for cell in row])
-            #for r in sheet.rows:
-            c.writerow([cell.value for cell in row])
-f.close()
+def copy_xslx_to_batch(batch_path):
+    print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
+    shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
 
-print(f"Reading spreadsheet: {args.xls_file}")
-workbook = openpyxl.load_workbook(args.xls_file)
-dataframe = workbook.active
+def save_xslx_as_csv():
+    print(f"Creating spreadsheet as csv")
+    wb = openpyxl.load_workbook(args.xls_file)
+    sheetnames = wb.sheetnames
+    sheet_value_arr = []
+    for a in sheetnames:
+        sheet = wb[a]
+        with open(batch_path+"/manifest.csv", "w") as f:
+            c = csv.writer(f)
+            for row in sheet.rows:
+                sheet_value_arr.append([cell.value for cell in row])
+                #for r in sheet.rows:
+                c.writerow([cell.value for cell in row])
 
-rows = dataframe.iter_rows()
-next(rows)
-for row in rows:
-    if ((str(row[0].value)) and (str(row[0].value) != "None" )): 
-        id = str(row[0].value)
-        print(f"Creating {batch_path}/{id}")
-        object_path = batch_path + "/" + id
-        try: 
-            os.mkdir(object_path)
-        except OSError as error:
-            print(f"Warning: {batch_path}/{id} - {error}.")
+def xls_file_as_df(xls_file):
+    print(f"Reading spreadsheet: {xls_file}")
+    workbook = openpyxl.load_workbook(xls_file)
+    dataframe = workbook.active
 
-print(f"Batch Path Creation Complete.")
+def make_dirs_from_df(dataframe):
+    rows = dataframe.iterrows()
+    next(rows)
+    for _, row in rows:
+        print(row)
+        if ((str(row.iloc[0])) and (str(row.iloc[0]) != "None" )): 
+            id = str(row.iloc[0])
+            print(f"Creating {batch_path}/{id}")
+            object_path = batch_path + "/" + id
+            try: 
+                os.mkdir(object_path)
+            except OSError as error:
+                print(f"Warning: {batch_path}/{id} - {error}.")
+
+
+if __name__ == '__main__':
+    batch_path = create_batch_folder(scanning_path, batch_name)
+    if args.use_google:
+        manager = sheetutils.GoogleSheetManager()
+        manager.connect(args.google_sheet_creds)
+        sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
+        df = sheet.read()
+        df.to_csv(f"{batch_path}/manifest.csv")
+        make_dirs_from_df(df)
+        pass
+    else:
+        copy_xsl_to_batch(batch_path)
+        save_xslx_as_csv()
+
+        df = xls_file_as_df(args.xls_file)
+    make_dirs_from_df(df)
+    
+    print(f"Batch Path Creation Complete.")
 
