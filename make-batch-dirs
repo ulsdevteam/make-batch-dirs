@@ -24,6 +24,7 @@ def setup_logger(name, log_file, level=logging.DEBUG):
     logger.addHandler(handler)
     return logger
 
+logger = logging # change as needed
 def read_yaml_file(path):
     with open(path, "r") as stream:
         return yaml.FullLoader(stream).get_data()
@@ -61,9 +62,10 @@ else:
 
 def create_batch_folder(scanning_path, batch_name):
     batch_path = scanning_path+"/"+batch_name
-
+    logger.info(f"Creating Batch Path: {batch_path}")
     print(f"Creating Batch Path: {batch_path}")
     if ( os.path.isdir(batch_path) ):
+        logger.err(f"Error: {batch_path} exists")
         print(f"Error: {batch_path} exists!")
         exit()
     else:
@@ -72,13 +74,16 @@ def create_batch_folder(scanning_path, batch_name):
 
 def copy_xslx_to_batch(batch_path):
     if os.path.isfile(batch_path+"/manifest.xlsx"):
+        logger.info(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
         print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
         shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
     else:
+        logger.err(f"Error: {batch_path}/manifest.xlsx does not exist.")
         print(f"Error: {batch_path}/manifest.xlsx does not exist.")
         exit()
 
 def save_xslx_as_csv():
+    logger.info(f"Creating spreadsheet as csv")
     print(f"Creating spreadsheet as csv")
     wb = openpyxl.load_workbook(args.xls_file)
     sheetnames = wb.sheetnames
@@ -93,6 +98,7 @@ def save_xslx_as_csv():
                 c.writerow([cell.value for cell in row])
 
 def xls_file_as_df(xls_file):
+    logger.info(f"Reading spreadsheet: {xls_file}")
     print(f"Reading spreadsheet: {xls_file}")
     workbook = openpyxl.load_workbook(xls_file)
     dataframe = workbook.active
@@ -104,21 +110,26 @@ def make_dirs_from_df(dataframe):
         #if ((str(row.iloc[0])) and (str(row.iloc[0]) != "None" )): 
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
             id = str(row.loc['id'])
+            logger.info(f"Creating {batch_path}/{id}")
             print(f"Creating {batch_path}/{id}")
             object_path = batch_path + "/" + id
             try: 
                 os.mkdir(object_path)
             except OSError as error:
+                logger.warn(f"Warning: {batch_path}/{id} - {error}.")
                 print(f"Warning: {batch_path}/{id} - {error}.")
 
 
 if __name__ == '__main__':
     if args.use_google:
         if not args.google_sheet_creds:
+            logger.err(f"Error: --google-sheet-creds is required.")
             print(f"Error: --google-sheet-creds is required.")
         if not args.google_sheet_id:
+            logger.err(f"Error: --google-sheet-id is required.")
             print(f"Error: --google-sheet-id is required.")
         if not args.google_sheet_name:
+            logger.err(f"Error: --google-sheet-name is required.")
             print(f"Error: --google-sheet-name is required.")
         if args.google_sheet_creds and args.google_sheet_id and args.google_sheet_name and os.path.isfile(args.google_sheet_creds): 
             manager = sheetutils.GoogleSheetManager()
@@ -132,14 +143,18 @@ if __name__ == '__main__':
                 if (len(df) > 0):
                     make_dirs_from_df(df)
                 else:
+                    logger.err(f"Error: Sheet contains no data.")
                     print(f"Error: Sheet contains no data.")
             else:
+                logger.err(f"Error: Column 'id' does not exist.")
                 print(f"Error: Column 'id' does not exist.")
                 exit()
         else:
+            logger.err(f"Error: Google arguments are required when using Google Sheets.")
             print(f"Error: Google arguments are required when using Google Sheets.")
             exit()
     else:
+        logger.info(f"Creating Batch folder: {scanning_path}/{batch_name}")
         print(f"Creating Batch folder: {scanning_path}/{batch_name}")
         batch_path = create_batch_folder(scanning_path, batch_name)
         copy_xslx_to_batch(batch_path)
@@ -147,5 +162,6 @@ if __name__ == '__main__':
         df = xls_file_as_df(args.xls_file)
         make_dirs_from_df(df)
     
+    logger.info(f"Batch Path Creation Complete.")
     print(f"Batch Path Creation Complete.")
 
