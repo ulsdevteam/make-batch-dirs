@@ -28,13 +28,21 @@ def read_yaml_file(path):
     with open(path, "r") as stream:
         return yaml.FullLoader(stream).get_data()
 
+def str_to_bool(value):
+    if value.lower() in {'true','t','yes','y','1'}:
+        return True
+    elif value.lower() in {'false','f','no','n','0'}:
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected')
+
 parser = argparse.ArgumentParser(description='Run..')
 parser.add_argument('--config-file', dest="config_file", required=True, help='Config file.')
 parser.add_argument('--xls-file', dest="xls_file", required=False, help='XLS file.')
-parser.add_argument('--batch-name', dest="batch_name", required=False, help='Name of the batch.')
-parser.add_argument('--use-google', dest='use_google', required=False)
+parser.add_argument('--batch-name', dest="batch_name", required=True, help='Name of the batch.')
+parser.add_argument('--use-google', dest='use_google', type=str_to_bool, required=False, default=False, help='Use Google Sheet.')
 parser.add_argument('--google-sheet-id', dest='google_sheet_id', required=False)
-parser.add_argument('--google-sheet-name', dest='google_sheet_name', required=False)
+parser.add_argument('--google-sheet-name', dest='google_sheet_name', default="Sheet1", required=False)
 parser.add_argument('--google-creds-file', dest='google_sheet_creds', required=False)
 args = parser.parse_args()
 
@@ -63,8 +71,12 @@ def create_batch_folder(scanning_path, batch_name):
     return batch_path
 
 def copy_xslx_to_batch(batch_path):
-    print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
-    shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
+    if os.path.isfile(batch_path+"/manifest.xlsx"):
+        print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
+        shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
+    else:
+        print(f"Error: {batch_path}/manifest.xlsx does not exist.")
+        exit()
 
 def save_xslx_as_csv():
     print(f"Creating spreadsheet as csv")
@@ -87,11 +99,11 @@ def xls_file_as_df(xls_file):
 
 def make_dirs_from_df(dataframe):
     rows = dataframe.iterrows()
-    next(rows)
     for _, row in rows:
-        print(row)
-        if ((str(row.iloc[0])) and (str(row.iloc[0]) != "None" )): 
-            id = str(row.iloc[0])
+        #print(row)
+        #if ((str(row.iloc[0])) and (str(row.iloc[0]) != "None" )): 
+        if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
+            id = str(row.loc['id'])
             print(f"Creating {batch_path}/{id}")
             object_path = batch_path + "/" + id
             try: 
@@ -101,21 +113,39 @@ def make_dirs_from_df(dataframe):
 
 
 if __name__ == '__main__':
-    batch_path = create_batch_folder(scanning_path, batch_name)
     if args.use_google:
-        manager = sheetutils.GoogleSheetManager()
-        manager.connect(args.google_sheet_creds)
-        sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
-        df = sheet.read()
-        df.to_csv(f"{batch_path}/manifest.csv")
-        make_dirs_from_df(df)
-        pass
+        if not args.google_sheet_creds:
+            print(f"Error: --google-sheet-creds is required.")
+        if not args.google_sheet_id:
+            print(f"Error: --google-sheet-id is required.")
+        if not args.google_sheet_name:
+            print(f"Error: --google-sheet-name is required.")
+        if args.google_sheet_creds and args.google_sheet_id and args.google_sheet_name and os.path.isfile(args.google_sheet_creds): 
+            manager = sheetutils.GoogleSheetManager()
+            manager.connect(args.google_sheet_creds)
+            sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
+            df = sheet.read()
+            batch_path = create_batch_folder(scanning_path, batch_name)
+            # Make sure the df has an 'id' column and data rows
+            if ('id' in df.columns):
+                # Make sure the df has rows besides the header row.
+                if (len(df) > 0):
+                    make_dirs_from_df(df)
+                else:
+                    print(f"Error: Sheet contains no data.")
+            else:
+                print(f"Error: Column 'id' does not exist.")
+                exit()
+        else:
+            print(f"Error: Google arguments are required when using Google Sheets.")
+            exit()
     else:
-        copy_xsl_to_batch(batch_path)
+        print(f"Creating Batch folder: {scanning_path}/{batch_name}")
+        batch_path = create_batch_folder(scanning_path, batch_name)
+        copy_xslx_to_batch(batch_path)
         save_xslx_as_csv()
-
         df = xls_file_as_df(args.xls_file)
-    make_dirs_from_df(df)
+        make_dirs_from_df(df)
     
     print(f"Batch Path Creation Complete.")
 

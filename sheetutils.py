@@ -10,6 +10,7 @@ logger = logging # use default logger
 class GoogleSheet:
     def __init__(self, sheet_obj):
         self.sheet = sheet_obj
+
     def read(self) -> pd.DataFrame:
         sheet = self.sheet
         data = sheet.get('values', [])
@@ -64,6 +65,7 @@ class GoogleSheet:
 class GoogleSheetManager:
     def __init__(self):
         self._service = None
+
     def connect(self, credentials_file):
         """
         Connects to the Google Sheets API using service account credentials.
