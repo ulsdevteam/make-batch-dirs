@@ -2,7 +2,5 @@
 *.csv
 *.log
 *.json
-*.new
-*.patch
 ignore/
 __pycache__/
