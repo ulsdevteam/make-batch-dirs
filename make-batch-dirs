@@ -11,11 +11,12 @@ import sheetutils
 import logging
 import openpyxl
 import csv
-
-def get_username():
+import pandas as pd# for type hints
+def get_username() -> str:
+    """fetch username of user running script"""
     return pwd.getpwuid(os.getuid())[0]
 
-def setup_logger(name, log_file, level=logging.DEBUG):
+def setup_logger(name:str, log_file:str, level=logging.DEBUG):
     """To setup as many loggers as needed"""
     handler = logging.FileHandler(log_file)
     handler.setFormatter(log_formatter)
@@ -25,11 +26,24 @@ def setup_logger(name, log_file, level=logging.DEBUG):
     return logger
 
 logger = logging # change as needed
-def read_yaml_file(path):
+def read_yaml_file(path: str) -> dict:
+    """ 
+    read yaml file.
+    Note: get_data coerces yaml to most appropriate type.
+        Most of the time this is dict, but might be list or str possibly
+    """
     with open(path, "r") as stream:
+        # FullLoader allows yaml to execute arbitrary python
+        # so script users are assumed to be trusted
         return yaml.FullLoader(stream).get_data()
 
-def str_to_bool(value):
+def str_to_bool(value: str) -> bool:
+    """
+    take common 'yes' and 'no' nouns and converts them to boolean
+    
+    error: raises ArgumentTypeError when noun not found within expected nouns
+    """
+    value = value.strip()
     if value.lower() in {'true','t','yes','y','1'}:
         return True
     elif value.lower() in {'false','f','no','n','0'}:
@@ -60,7 +74,12 @@ else:
     batch_name = os.path.splitext(os.path.basename(args.xls_file))[0]
 
 
-def create_batch_folder(scanning_path, batch_name):
+def create_batch_folder(scanning_path:str, batch_name:str):
+    """
+    create folder {scanning_path}/{batch_name} in cwd
+    
+    error: if path exists, then logs error and exits
+    """
     batch_path = scanning_path+"/"+batch_name
     logger.info(f"Creating Batch Path: {batch_path}")
     print(f"Creating Batch Path: {batch_path}")
@@ -72,7 +91,12 @@ def create_batch_folder(scanning_path, batch_name):
         os.mkdir(batch_path)
     return batch_path
 
-def copy_xslx_to_batch(batch_path):
+def copy_xslx_to_batch(batch_path:str):
+    """
+    copy manifest.xslx into batch_path created folder
+
+    error: if manifest.xslx does not exist, then log and fail
+    """
     if os.path.isfile(batch_path+"/manifest.xlsx"):
         logger.info(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
         print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
@@ -82,7 +106,10 @@ def copy_xslx_to_batch(batch_path):
         print(f"Error: {batch_path}/manifest.xlsx does not exist.")
         exit()
 
-def save_xslx_as_csv():
+def save_xslx_as_csv(batch_path:str):
+    """
+    save args.xls_file into batch_path/manifest.csv
+    """
     logger.info(f"Creating spreadsheet as csv")
     print(f"Creating spreadsheet as csv")
     wb = openpyxl.load_workbook(args.xls_file)
@@ -97,13 +124,23 @@ def save_xslx_as_csv():
                 #for r in sheet.rows:
                 c.writerow([cell.value for cell in row])
 
-def xls_file_as_df(xls_file):
+def xls_file_as_df(xls_file:str) -> pd.DataFrame:
+    """
+    read xls file as dataframe
+    """
     logger.info(f"Reading spreadsheet: {xls_file}")
     print(f"Reading spreadsheet: {xls_file}")
     workbook = openpyxl.load_workbook(xls_file)
     dataframe = workbook.active
+    return dataframe
 
-def make_dirs_from_df(dataframe):
+def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
+    """
+    read id field of dataframe, and create batch_path/id
+    for non empty and non None ids.
+
+    error: log if mkdir fails
+    """
     rows = dataframe.iterrows()
     for _, row in rows:
         #print(row)
@@ -158,9 +195,9 @@ if __name__ == '__main__':
         print(f"Creating Batch folder: {scanning_path}/{batch_name}")
         batch_path = create_batch_folder(scanning_path, batch_name)
         copy_xslx_to_batch(batch_path)
-        save_xslx_as_csv()
+        save_xslx_as_csv(batch_path)
         df = xls_file_as_df(args.xls_file)
-        make_dirs_from_df(df)
+        make_dirs_from_df(df, batch_path)
     
     logger.info(f"Batch Path Creation Complete.")
     print(f"Batch Path Creation Complete.")
