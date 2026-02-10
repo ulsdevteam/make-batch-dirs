@@ -12,6 +12,7 @@ import logging
 import openpyxl
 import csv
 import pandas as pd# for type hints
+
 def get_username() -> str:
     """fetch username of user running script"""
     return pwd.getpwuid(os.getuid())[0]
@@ -80,7 +81,7 @@ def create_batch_folder(scanning_path:str, batch_name:str):
     
     error: if path exists, then logs error and exits
     """
-    batch_path = scanning_path+"/"+batch_name
+    batch_path = os.path.sep.join(scanning_path,batch_name)
     logger.info(f"Creating Batch Path: {batch_path}")
     print(f"Creating Batch Path: {batch_path}")
     if ( os.path.isdir(batch_path) ):
@@ -97,10 +98,10 @@ def copy_xslx_to_batch(batch_path:str):
 
     error: if manifest.xslx does not exist, then log and fail
     """
-    if os.path.isfile(batch_path+"/manifest.xlsx"):
+    if os.path.isfile(os.path.sep.join(batch_path,'manifest.xlsx')):
         logger.info(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
         print(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
-        shutil.copyfile(args.xls_file, batch_path+"/manifest.xlsx")
+        shutil.copyfile(args.xls_file, os.path.sep.join(batch_path,'manifest.xlsx'))
     else:
         logger.err(f"Error: {batch_path}/manifest.xlsx does not exist.")
         print(f"Error: {batch_path}/manifest.xlsx does not exist.")
@@ -117,7 +118,7 @@ def save_xslx_as_csv(batch_path:str):
     sheet_value_arr = []
     for a in sheetnames:
         sheet = wb[a]
-        with open(batch_path+"/manifest.csv", "w") as f:
+        with open(os.path.sep.join(batch_path,'manifest.csv'), "w") as f:
             c = csv.writer(f)
             for row in sheet.rows:
                 sheet_value_arr.append([cell.value for cell in row])
@@ -149,12 +150,12 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
             id = str(row.loc['id'])
             logger.info(f"Creating {batch_path}/{id}")
             print(f"Creating {batch_path}/{id}")
-            object_path = batch_path + "/" + id
+            object_path = os.path.sep.join(batch_path,id)
             try: 
                 os.mkdir(object_path)
             except OSError as error:
-                logger.warn(f"Warning: {batch_path}/{id} - {error}.")
-                print(f"Warning: {batch_path}/{id} - {error}.")
+                logger.warn(f"Warning: {object_path} - {error}.")
+                print(f"Warning: {object_path} - {error}.")
 
 
 if __name__ == '__main__':
