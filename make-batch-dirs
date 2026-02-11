@@ -79,7 +79,7 @@ def copy_xslx_to_batch(batch_path:str):
     """
     if os.path.isfile(os.path.sep.join([batch_path,'manifest.xlsx'])):
         logger.info(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
-        shutil.copyfile(args.xls_file, os.path.sep.join(batch_path,'manifest.xlsx'))
+        shutil.copyfile(args.xls_file, os.path.sep.join([batch_path,'manifest.xlsx']))
     else:
         logger.error(f"Error: {batch_path}/manifest.xlsx does not exist.")
         exit(1)
@@ -94,7 +94,7 @@ def save_xslx_as_csv(batch_path:str):
     sheet_value_arr = []
     for a in sheetnames:
         sheet = wb[a]
-        with open(os.path.sep.join(batch_path,'manifest.csv'), "w") as f:
+        with open(os.path.sep.join([batch_path,'manifest.csv']), "w") as f:
             c = csv.writer(f)
             for row in sheet.rows:
                 sheet_value_arr.append([cell.value for cell in row])
@@ -122,7 +122,7 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
             id = str(row.loc['id'])
             logger.info(f"Creating {batch_path}/{id}")
-            object_path = os.path.sep.join(batch_path,id)
+            object_path = os.path.sep.join([batch_path,id])
             try: 
                 os.mkdir(object_path)
             except OSError as error:
