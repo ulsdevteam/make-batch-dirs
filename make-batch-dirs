@@ -144,8 +144,6 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
     """
     rows = dataframe.iterrows()
     for _, row in rows:
-        #print(row)
-        #if ((str(row.iloc[0])) and (str(row.iloc[0]) != "None" )): 
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
             id = str(row.loc['id'])
             logger.info(f"Creating {batch_path}/{id}")
