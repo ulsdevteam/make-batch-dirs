@@ -77,11 +77,12 @@ def copy_xslx_to_batch(batch_path:str):
 
     error: if manifest.xslx does not exist, then log and fail
     """
-    if os.path.isfile(os.path.sep.join([batch_path,'manifest.xlsx'])):
-        logger.info(f"Copying spreadsheet to {batch_path}/manifest.xlsx")
-        shutil.copyfile(args.xls_file, os.path.sep.join([batch_path,'manifest.xlsx']))
+    manifest_path = os.path.sep.join([batch_path,'manifest.xlsx'])
+    if os.path.isfile(manifest_path):
+        logger.info(f"Copying spreadsheet to {manifest_path}")
+        shutil.copyfile(args.xls_file, manifest_path)
     else:
-        logger.error(f"Error: {batch_path}/manifest.xlsx does not exist.")
+        logger.error(f"Error: {manifest_path} does not exist.")
         exit(1)
 
 def save_xslx_as_csv(batch_path:str):
@@ -92,9 +93,10 @@ def save_xslx_as_csv(batch_path:str):
     wb = openpyxl.load_workbook(args.xls_file)
     sheetnames = wb.sheetnames
     sheet_value_arr = []
+    manifest_csv = os.path.sep.join([batch_path,'manifest.csv'])
     for a in sheetnames:
         sheet = wb[a]
-        with open(os.path.sep.join([batch_path,'manifest.csv']), "w") as f:
+        with open(manifest_csv, "w") as f:
             c = csv.writer(f)
             for row in sheet.rows:
                 sheet_value_arr.append([cell.value for cell in row])
