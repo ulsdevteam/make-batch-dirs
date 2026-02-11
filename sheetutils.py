@@ -60,12 +60,16 @@ class GoogleSheet:
         }
 
         # Update the sheet with DataFrame contents
-        result = sheet.values().update(
-            spreadsheetId=spreadsheet_id,
-            range=f'{sheet_name}!A1',
-            valueInputOption='RAW',
-            body=body
-        ).execute()
+        try: 
+            result = sheet.values().update(
+                spreadsheetId=spreadsheet_id,
+                range=f'{sheet_name}!A1',
+                valueInputOption='RAW',
+                body=body
+            ).execute()
+        except Exception as e:
+            logger.err(f"Failed to update {spreadsheet_id}:{sheet_name} due to {e}")
+            exit()
 
         updated_cells = result.get('updatedCells', 0)
         logger.info(f"Successfully updated {updated_cells} cells")
