@@ -117,8 +117,17 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
     read id field of dataframe, and create batch_path/id
     for non empty and non None ids.
 
-    error: log if mkdir fails
+    error: log if mkdir fails. log and exit if id not in 
+        dataframe's columns or dataframe empty 
     """
+    # Make sure the df has an 'id' column and data rows
+    if 'id' not in df.columns:
+        logger.error(f"Column 'id' does not exist")
+        exit(1)
+    # Make sure the df has rows besides the header row.
+    if len(df) == 0:
+        logger.error("Sheet contains no data")
+        exit(1)
     rows = dataframe.iterrows()
     for _, row in rows:
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
@@ -184,16 +193,7 @@ def main():
             sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
             df = sheet.read()
             batch_path = create_batch_folder(scanning_path, batch_name)
-            # Make sure the df has an 'id' column and data rows
-            if ('id' in df.columns):
-                # Make sure the df has rows besides the header row.
-                if (len(df) > 0):
-                    make_dirs_from_df(df)
-                else:
-                    logger.error(f"Error: Sheet contains no data.")
-            else:
-                logger.error(f"Error: Column 'id' does not exist.")
-                exit(1)
+            make_dirs_from_df(df)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
             exit()
