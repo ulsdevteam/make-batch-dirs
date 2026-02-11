@@ -46,6 +46,8 @@ Script Parameters:
   \--xls-file         Path to the spreadsheet to be processed.
 
   \--batch-name       The Name of the batch that will be created.
+
+  \--log-file         Path to the log file.
   -----------------------------------------------------------------------
 
 ## Usage:
@@ -53,7 +55,7 @@ Script Parameters:
 Script Usage Example:
 
 make-batch-dirs ---config_file config.conf ---xls-file
-input_spreadsheet.xls ---batch-name MyNewBatch
+input_spreadsheet.xls ---log-file log.txt ---batch-name MyNewBatch
 
 ## Function:
 
