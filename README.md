@@ -1,6 +1,5 @@
 # Description:
 
-
 This script is used to read a list of PIDs from a spreadsheet and a
 passed in batch name, create the batch folder and corresponding PID
 sub-folders in preparation for DRL to perform their scanning processes.
