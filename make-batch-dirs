@@ -143,6 +143,9 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
 # Main function.
 #
 def main():
+    """
+    This the main function.
+    """
     # Parse command line arguements
     parser = argparse.ArgumentParser(description='Run..')
     parser.add_argument('--config-file', dest="config_file", required=True, help='Config file.')
