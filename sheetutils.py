@@ -1,30 +1,35 @@
-from googleapiclient.discovery import build
+from googleapiclient.discovery import build, Resource
 from google.oauth2 import service_account
 import os
 import pandas as pd
-from typing import TypeAlias
+from typing import TypeAlias, Any
 import logging
 
 logger = logging # use default logger
 
 class GoogleSheet:
-    def __init__(self, sheet_obj):
+    """
+    represents a single spreadsheet (i.e. a single tab in sheets)
+    and allows read and update operations
+    """
+    def __init__(self, sheet_obj: Resource):
         self.sheet = sheet_obj
 
     def read(self) -> pd.DataFrame:
+        """
+        read spreadsheet from service resource object into dataframe 
+        """
         sheet = self.sheet
         data = sheet.get('values', [])
 
         if not data:
             logger.warn(f"read_google_sheet - No data found in the specified worksheet.")
-            print(f"No data found in the specified worksheet.")
 
             # Return empty DataFrame
             return pd.DataFrame()
 
         else:
             logger.info(f"read_google_sheet - Read of Google Sheet Successful.")
-            print(f"Read of Google Sheet Successful.")
 
             # Convert to DataFrame
             # First row as headers, rest as data
@@ -42,7 +47,10 @@ class GoogleSheet:
             return df
 
     def update(self, df: pd.DataFrame) -> tuple[bool, str]:
-
+        """
+        write contents of df into spreadsheet. Note that this
+        overwrites the spreadsheet contents
+        """
         # Convert DataFrame to list of lists (including headers)
         values = [df.columns.tolist()] + df.values.tolist()
 
@@ -60,13 +68,18 @@ class GoogleSheet:
         ).execute()
 
         updated_cells = result.get('updatedCells', 0)
+        logger.info(f"Successfully updated {updated_cells} cells")
         return True, f"Successfully updated {updated_cells} cells"
 
 class GoogleSheetManager:
+    """
+    handles the boilerplate of creating an authenticated 
+    service and returning a spreadsheet object. 
+    """
     def __init__(self):
         self._service = None
 
-    def connect(self, credentials_file):
+    def connect(self, credentials_file:str) -> Resource:
         """
         Connects to the Google Sheets API using service account credentials.
 
@@ -95,14 +108,28 @@ class GoogleSheetManager:
             raise Exception(f"Failed to create Google Sheets service: {str(e)}")
     
     @property
-    def service(self):
+    def service(self) -> Resource:
+        """
+        getter for service. 
+        Using service as property allows instantiation of object and 
+        authentication to be separated, while also ensuring that all calls
+        to service are authenticated
+        """
         if self._service is None:
-            raise Exception("Connect not executed")
+            raise ValueError("Connect not executed")
         return self._service
     
-    def sheet(self, spreadsheet_id, sheet_name):
-        sheet = self.service.spreadsheets().values().get(
-            spreadsheetId=spreadsheet_id, # spreadsheet id is base64 in edit url
-            range=sheet_name
-        ).execute()
+    def sheet(self, spreadsheet_id:str, sheet_name:str) -> GoogleSheet:
+        """ 
+        Uses instantiated service to fetch Google Sheet 
+        `spreadsheet_id` and fetches the `sheet_name` spreadsheet
+        """
+        try:
+            sheet = self.service.spreadsheets().values().get(
+                spreadsheetId=spreadsheet_id, # spreadsheet id is base64 in edit url
+                range=sheet_name
+            ).execute()
+        except Exception as e:
+            print(f"Failed to read {spreadsheet_id}:{sheet_name} due to {e}")
+            exit()
         return GoogleSheet(sheet)

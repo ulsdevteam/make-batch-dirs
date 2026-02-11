@@ -64,7 +64,6 @@ def create_batch_folder(scanning_path:str, batch_name:str):
     """
     batch_path = os.path.sep.join([scanning_path,batch_name])
     logger.info(f"Creating Batch Path: {batch_path}")
-    print(f"Creating Batch Path: {batch_path}")
     if ( os.path.isdir(batch_path) ):
         logger.error(f"Error: {batch_path} exists")
         exit(1)
