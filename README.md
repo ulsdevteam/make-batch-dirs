@@ -41,7 +41,6 @@ Spreadsheet Columns:
   |\--xls-file         |Path to the spreadsheet to be processed.|
   |\--batch-name       |The Name of the batch that will be created.|
   |\--log-file         |Path to the log file.|
-  |------------------- |---------------------------------------------------|
 
 ## Usage:
 
