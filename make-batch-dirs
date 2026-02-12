@@ -112,7 +112,7 @@ def xls_file_as_df(xls_file:str) -> pd.DataFrame:
     dataframe = workbook.active
     return dataframe
 
-def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
+def make_dirs_from_df(df:pd.DataFrame, batch_path):
     """
     read id field of dataframe, and create batch_path/id
     for non empty and non None ids.
@@ -128,7 +128,7 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
     if len(df) == 0:
         logger.error("Sheet contains no data")
         exit(1)
-    rows = dataframe.iterrows()
+    rows = df.iterrows()
     for _, row in rows:
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
             id = str(row.loc['id'])
@@ -196,7 +196,7 @@ def main():
             sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
             df = sheet.read()
             batch_path = create_batch_folder(scanning_path, batch_name)
-            make_dirs_from_df(df)
+            make_dirs_from_df(df,batch_path)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
             exit()
