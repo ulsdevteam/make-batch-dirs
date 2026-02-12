@@ -41,6 +41,17 @@ Spreadsheet Columns:
   |\--google-sheet-name|The Google Sheet Tab Name.|
   |\--google-creds-file|The file containing the Google credentials file.|
 
+## Config File requirements:
+
+The config file contains a single option "scanning_path" that points the script to where you would like to build the directory structure for the batch-name you are passing in to the script.  This is the top level folder usually where you would store all your batches.  In our example, we would set "scanning_path" to "/scanning" as in the following.
+
+```
+scaning_path: /scanning
+```
+
+An example config file can be found in the make-batch-dirs.conf-sample file.
+
+
 ## Usage:
 
 Script Usage Examples:
