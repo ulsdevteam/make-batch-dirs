@@ -38,7 +38,7 @@ Spreadsheet Columns:
   |\--log-file         |Path to the log file.|
   |\--use-google       |Set this to true if using Google Sheets.|
   |\--google-sheet-id  |The Google Sheet Identifier.|
-  |\--google-sheet-name|The Google Sheet Tab Name.|
+  |\--google-sheet-name|The Google Sheet Tab Name. This defaults to 'Sheet1' if not included.|
   |\--google-creds-file|The file containing the Google credentials file.|
 
 ## Config File requirements:
