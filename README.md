@@ -20,18 +20,13 @@ sub-folders in preparation for DRL to perform their scanning processes.
 
 Spreadsheet Columns:
 
-  |-----------------------------------------------------------------------|
-  |**Required          
-  Columns**|           
+  |**Required Columns**|           
   |------------------- |---------------------------------------------------|
-  |'id'                |This is the PID of the object. Must currently be
-                      the first column of the sheet.|
+  |'id'                |This is the PID of the object. Must currently be the first column of the sheet.|
 
-  |**Optional          
-  Columns**|           
-
+  |**Optional Columns**|           
+  |------------------- |---------------------------------------------------|
   |Any                 |Any additional columns as needed.|
-  |-----------------------------------------------------------------------|
 
 ## Script Parameters:
 
@@ -46,8 +41,8 @@ Spreadsheet Columns:
 
 Script Usage Example:
 
-make-batch-dirs ---config_file config.conf ---xls-file
-input_spreadsheet.xls ---log-file log.txt ---batch-name MyNewBatch
+make-batch-dirs --config_file config.conf --xls-file
+input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch
 
 ## Function:
 
