@@ -32,10 +32,14 @@ Spreadsheet Columns:
 
   |Parameter           |Description|
   |------------------- |---------------------------------------------------|
-  |\--config_file      |Path to the script config file containing paths to the workbench directory (workbench_path), the scanning directory (scanning_path), and the path to the python executable.|
+  |\--config-file      |Path to the script config file containing paths to the workbench directory (workbench_path), the scanning directory (scanning_path), and the path to the python executable.|
   |\--xls-file         |Path to the spreadsheet to be processed.|
   |\--batch-name       |The Name of the batch that will be created.|
   |\--log-file         |Path to the log file.|
+  |\--use-google       |Set this to true if using Google Sheets.|
+  |\--google-sheet-id  |The Google Sheet Identifier.|
+  |\--google-sheet-name|The Google Sheet Tab Name.|
+  |\--google-creds-file|The file containing the Google credentials file.|
 
 ## Usage:
 
