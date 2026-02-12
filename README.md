@@ -40,7 +40,7 @@ Spreadsheet Columns:
 ## Usage:
 
 Script Usage Examples:
-  |Examples:|
+  |:Examples|
   |---|
   |make-batch-dirs --config_file config.conf --xls-file
 input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch|
