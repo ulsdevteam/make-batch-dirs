@@ -198,6 +198,7 @@ def main():
         df = pd.read_excel(args.xls_file)
         batch_path = create_batch_folder(scanning_path, batch_name)
         make_dirs_from_df(df,batch_path)
+        logger.info(f"Storing local copy of xlsx file and creating csv file from Google Sheet.")
         copy_xslx_to_batch(batch_path)
         save_xslx_as_csv(batch_path)
 
