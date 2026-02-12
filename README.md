@@ -40,10 +40,10 @@ Spreadsheet Columns:
 ## Usage:
 
 Script Usage Examples:
-
-  |Spread Sheet E.g. |make-batch-dirs --config_file config.conf --xls-file
-input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch|
-  |Google Sheet E.g. |make-batch-dirs --config_file config.conf --log-file log.xt --batch-name MyNewBatch --|
+  |Examples:||
+  |make-batch-dirs --config_file config.conf --xls-file
+input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch||
+  |make-batch-dirs --config_file config.conf --log-file log.xt --batch-name MyNewBatch --||
 
 
 ## Function:
