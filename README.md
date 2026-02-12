@@ -39,16 +39,16 @@ Spreadsheet Columns:
 
 ## Usage:
 
-Script Usage Example:
+Script Usage Examples:
 
-make-batch-dirs --config_file config.conf --xls-file
-input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch
+  |Spread Sheet E.g. |make-batch-dirs --config_file config.conf --xls-file
+input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch|
+  |Google Sheet E.g. |make-batch-dirs --config_file config.conf --log-file log.xt --batch-name MyNewBatch --|
+
 
 ## Function:
 
-For each row in the spreadsheet, obtain the first column contents which
-should be the 'id' column and construct a new directory structure in the
-format of {scanning_path}/{batch-name}/{id}.
+For each row in the spreadsheet, obtain the 'id' column contents and construct a new directory structure in the format of {scanning_path}/{batch-name}/{id}.
 
 E.g. Result: /scanning/MyNewBatch/317350000001,
 /scanning/MyNewBatch/317350000002, /scanning/MyNewBatch/317350000003
