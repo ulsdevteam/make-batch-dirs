@@ -31,7 +31,7 @@ Spreadsheet Columns:
 ## Script Parameters:
 
   |Parameter           |Description|
-  |------------------- |---------------------------------------------------|
+  |:--- |:--- |
   |\--config-file      |Path to the script config file containing paths to the workbench directory (workbench_path), the scanning directory (scanning_path), and the path to the python executable.|
   |\--xls-file         |Path to the spreadsheet to be processed.|
   |\--batch-name       |The Name of the batch that will be created.|
@@ -45,9 +45,9 @@ Spreadsheet Columns:
 
 Script Usage Examples:
   |Type|Example|
-  |:---|---|
+  |:--- |:--- |
   |Spreadsheet|make-batch-dirs --config_file config.conf --xls-file input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch|
-  |Google Sheet|make-batch-dirs --config_file config.conf --log-file log.xt --batch-name MyNewBatch --|
+  |Google Sheet|make-batch-dirs --config_file config.conf --log-file log.txt --batch-name MyNewBatch --use_google {true\\|false} --google-sheet-id {sheet id} --google-sheet-name {E.g. 'Sheet1'} --google-creds-file {path to credentials file.}|
 
 
 ## Function:
