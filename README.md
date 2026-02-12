@@ -37,16 +37,14 @@ Spreadsheet Columns:
 
   |Parameter           |Description|
   |------------------- |---------------------------------------------------|
-  |\--config_file      |Path to the script config file containing paths to
-                      the workbench directory (workbench_path), the
-                      scanning directory (scanning_path), and the path to
-                      the python executable.|
+  |\--config_file      |Path to the script config file containing paths to the workbench directory (workbench_path), the scanning directory (scanning_path), and the path to the python executable.|
 
   |\--xls-file         |Path to the spreadsheet to be processed.|
 
   |\--batch-name       |The Name of the batch that will be created.|
 
   |\--log-file         |Path to the log file.|
+  |------------------- |---------------------------------------------------|
 
 ## Usage:
 
