@@ -196,7 +196,7 @@ def main():
             make_dirs_from_df(df)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
-            exit()
+            exit(1)
     # Else we are using a Spreadsheet...
     else:
         logger.info(f"Using Spreadsheet: {args.xls_file}")

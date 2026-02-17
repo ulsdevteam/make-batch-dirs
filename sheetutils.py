@@ -69,7 +69,7 @@ class GoogleSheet:
             ).execute()
         except Exception as e:
             logger.err(f"Failed to update {spreadsheet_id}:{sheet_name} due to {e}")
-            exit()
+            exit(1)
 
         updated_cells = result.get('updatedCells', 0)
         logger.info(f"Successfully updated {updated_cells} cells")
@@ -134,6 +134,6 @@ class GoogleSheetManager:
                 range=sheet_name
             ).execute()
         except Exception as e:
-            print(f"Failed to read {spreadsheet_id}:{sheet_name} due to {e}")
-            exit()
+            logger.err(f"Failed to read {spreadsheet_id}:{sheet_name} due to {e}")
+            exit(1)
         return GoogleSheet(sheet)
