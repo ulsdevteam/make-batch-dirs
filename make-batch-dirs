@@ -78,11 +78,11 @@ def copy_xslx_to_batch(batch_path:str):
     error: if manifest.xslx does not exist, then log and fail
     """
     manifest_path = os.path.sep.join([batch_path,'manifest.xlsx'])
-    if os.path.isfile(manifest_path):
+    if not os.path.isfile(manifest_path):
         logger.info(f"Copying spreadsheet to {manifest_path}")
         shutil.copyfile(args.xls_file, manifest_path)
     else:
-        logger.error(f"Error: {manifest_path} does not exist.")
+        logger.error(f"Error: {manifest_path} already exists.")
         exit(1)
 
 def save_xslx_as_csv(batch_path:str):
@@ -103,16 +103,7 @@ def save_xslx_as_csv(batch_path:str):
                 #for r in sheet.rows:
                 c.writerow([cell.value for cell in row])
 
-def xls_file_as_df(xls_file:str) -> pd.DataFrame:
-    """
-    read xls file as dataframe
-    """
-    logger.info(f"Reading spreadsheet: {xls_file}")
-    workbook = openpyxl.load_workbook(xls_file)
-    dataframe = workbook.active
-    return dataframe
-
-def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
+def make_dirs_from_df(df:pd.DataFrame, batch_path):
     """
     read id field of dataframe, and create batch_path/id
     for non empty and non None ids.
@@ -128,7 +119,7 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
     if len(df) == 0:
         logger.error("Sheet contains no data")
         exit(1)
-    rows = dataframe.iterrows()
+    rows = df.iterrows()
     for _, row in rows:
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
             id = str(row.loc['id'])
@@ -143,6 +134,9 @@ def make_dirs_from_df(dataframe:pd.DataFrame, batch_path):
 # Main function.
 #
 def main():
+    """
+    This the main function.
+    """
     # Parse command line arguements
     parser = argparse.ArgumentParser(description='Run..')
     parser.add_argument('--config-file', dest="config_file", required=True, help='Config file.')
@@ -193,7 +187,7 @@ def main():
             sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
             df = sheet.read()
             batch_path = create_batch_folder(scanning_path, batch_name)
-            make_dirs_from_df(df)
+            make_dirs_from_df(df,batch_path)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
             exit(1)
@@ -201,11 +195,12 @@ def main():
     else:
         logger.info(f"Using Spreadsheet: {args.xls_file}")
         logger.info(f"Creating Batch folder: {scanning_path}/{batch_name}")
+        df = pd.read_excel(args.xls_file)
         batch_path = create_batch_folder(scanning_path, batch_name)
+        make_dirs_from_df(df,batch_path)
+        logger.info(f"Storing local copy of xlsx file and creating csv file from Google Sheet.")
         copy_xslx_to_batch(batch_path)
         save_xslx_as_csv(batch_path)
-        df = xls_file_as_df(args.xls_file)
-        make_dirs_from_df(df, batch_path)
 
     logger.info(f"Batch Path Creation Complete.")
 
