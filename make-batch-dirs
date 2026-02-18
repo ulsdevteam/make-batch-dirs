@@ -93,16 +93,20 @@ def save_xslx_as_csv(batch_path:str):
     logger.info(f"Creating spreadsheet as csv")
     wb = openpyxl.load_workbook(args.xls_file)
     sheetnames = wb.sheetnames
-    sheet_value_arr = []
     manifest_csv = os.path.sep.join([batch_path,'manifest.csv'])
-    for a in sheetnames:
-        sheet = wb[a]
-        with open(manifest_csv, "w") as f:
-            c = csv.writer(f)
-            for row in sheet.rows:
-                sheet_value_arr.append([cell.value for cell in row])
-                #for r in sheet.rows:
-                c.writerow([cell.value for cell in row])
+    try:
+        for a in sheetnames:
+            sheet = wb[a]
+            with open(manifest_csv, "w") as f:
+                c = csv.writer(f)
+                for row in sheet.rows:
+                    #for r in sheet.rows:
+                    c.writerow([cell.value for cell in row])
+    except Exception as e:
+        logger.error(f"writing to csv failed due to {e}")
+        if os.path.exists(manifest_csv):
+            os.remove(manifest_csv) # remove partial manifest
+        exit(1)
 
 def make_dirs_from_df(df:pd.DataFrame, batch_path):
     """
