@@ -66,7 +66,7 @@ def create_batch_folder(scanning_path:str, batch_name:str):
     logger.info(f"Creating Batch Path: {batch_path}")
     if ( os.path.isdir(batch_path) ):
         logger.error(f"Error: {batch_path} exists")
-        exit(1)
+        sys.exit(1)
     else:
         os.mkdir(batch_path)
     return batch_path
@@ -84,7 +84,7 @@ def copy_xslx_to_batch(batch_path:str):
         shutil.copyfile(args.xls_file, manifest_path)
     else:
         logger.error(f"Error: {manifest_path} already exists.")
-        exit(1)
+        sys.exit(1)
 
 def save_xslx_as_csv(batch_path:str):
     """
@@ -106,7 +106,7 @@ def save_xslx_as_csv(batch_path:str):
         logger.error(f"writing to csv failed due to {e}")
         if os.path.exists(manifest_csv):
             os.remove(manifest_csv) # remove partial manifest
-        exit(1)
+        sys.exit(1)
 
 def make_dirs_from_df(df:pd.DataFrame, batch_path):
     """
@@ -119,11 +119,11 @@ def make_dirs_from_df(df:pd.DataFrame, batch_path):
     # Make sure the df has an 'id' column and data rows
     if 'id' not in df.columns:
         logger.error(f"Column 'id' does not exist")
-        exit(1)
+        sys.exit(1)
     # Make sure the df has rows besides the header row.
     if len(df) == 0:
         logger.error("Sheet contains no data")
-        exit(1)
+        sys.exit(1)
     rows = df.iterrows()
     for _, row in rows:
         if (str(row.loc['id']) and (str(row.loc['id']) != "None" )): 
@@ -195,12 +195,18 @@ def main():
             make_dirs_from_df(df,batch_path)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
-            exit(1)
+            sys.exit(1)
     # Else we are using a Spreadsheet...
     else:
         logger.info(f"Using Spreadsheet: {args.xls_file}")
         logger.info(f"Creating Batch folder: {scanning_path}/{batch_name}")
-        df = pd.read_excel(args.xls_file)
+        try:
+            df = pd.read_excel(args.xls_file)
+        except FileNotFoundError:
+            logger.error(f"{args.xls_file} not found. Exiting...")
+            sys.exit(1)
+        except Exception as e:
+            logger.error(f"reading {args.xls_file} failed due to {e}. Exiting...") 
         batch_path = create_batch_folder(scanning_path, batch_name)
         make_dirs_from_df(df,batch_path)
         logger.info(f"Storing local copy of xlsx file and creating csv file from Google Sheet.")

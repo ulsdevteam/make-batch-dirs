@@ -1,6 +1,7 @@
 from googleapiclient.discovery import build, Resource
 from google.oauth2 import service_account
 import os
+import sys
 import pandas as pd
 from typing import TypeAlias, Any
 import logging
@@ -69,7 +70,7 @@ class GoogleSheet:
             ).execute()
         except Exception as e:
             logger.err(f"Failed to update {spreadsheet_id}:{sheet_name} due to {e}")
-            exit(1)
+            sys.exit(1)
 
         updated_cells = result.get('updatedCells', 0)
         logger.info(f"Successfully updated {updated_cells} cells")
@@ -135,5 +136,5 @@ class GoogleSheetManager:
             ).execute()
         except Exception as e:
             logger.err(f"Failed to read {spreadsheet_id}:{sheet_name} due to {e}")
-            exit(1)
+            sys.exit(1)
         return GoogleSheet(sheet)
