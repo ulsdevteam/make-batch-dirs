@@ -78,7 +78,8 @@ def copy_xslx_to_batch(batch_path:str):
     error: if manifest.xslx does not exist, then log and fail
     """
     manifest_path = os.path.sep.join([batch_path,'manifest.xlsx'])
-    if not os.path.isfile(manifest_path):
+    if (os.path.exists(args.xls_file) and 
+            os.path.isfile(args.xls_file)):
         logger.info(f"Copying spreadsheet to {manifest_path}")
         shutil.copyfile(args.xls_file, manifest_path)
     else:
