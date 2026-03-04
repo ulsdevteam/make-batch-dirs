@@ -2,5 +2,5 @@
 *.csv
 *.log
 *.json
-*.new
 ignore/
+__pycache__/

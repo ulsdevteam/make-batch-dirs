@@ -20,46 +20,50 @@ sub-folders in preparation for DRL to perform their scanning processes.
 
 Spreadsheet Columns:
 
-  -----------------------------------------------------------------------
-  **Required          
-  Columns**           
-  ------------------- ---------------------------------------------------
-  'id'                This is the PID of the object. Must currently be
-                      the first column of the sheet.
+  |Required Columns    ||           
+  |------------------- |---------------------------------------------------|
+  |'id'                |This is the PID of the object. Must currently be the first column of the sheet.|
 
-  **Optional          
-  Columns**           
+  |Optional Columns    ||           
+  |------------------- |---------------------------------------------------|
+  |Any                 |Any additional columns as needed.|
 
-  Any                 Any additional columns as needed.
-  -----------------------------------------------------------------------
+## Script Parameters:
 
-Script Parameters:
+  |Parameter           |Description|
+  |:--- |:--- |
+  |\--config-file      |Path to the script config file containing paths to the workbench directory (workbench_path), the scanning directory (scanning_path), and the path to the python executable.|
+  |\--xls-file         |Path to the spreadsheet to be processed.|
+  |\--batch-name       |The Name of the batch that will be created.|
+  |\--log-file         |Path to the log file.|
+  |\--use-google       |Set this to true if using Google Sheets.|
+  |\--google-sheet-id  |The Google Sheet Identifier.|
+  |\--google-sheet-name|The Google Sheet Tab Name. This defaults to 'Sheet1' if not included.|
+  |\--google-creds-file|The file containing the Google credentials file.|
 
-  -----------------------------------------------------------------------
-  Parameter           Description
-  ------------------- ---------------------------------------------------
-  \--config_file      Path to the script config file containing paths to
-                      the workbench directory (workbench_path), the
-                      scanning directory (scanning_path), and the path to
-                      the python executable.
+## Config File requirements:
 
-  \--xls-file         Path to the spreadsheet to be processed.
+The config file contains a single option "scanning_path" that points the script to where you would like to build the directory structure for the batch-name you are passing in to the script.  This is the top level folder usually where you would store all your batches.  In our example, we would set "scanning_path" to "/scanning" as in the following.
 
-  \--batch-name       The Name of the batch that will be created.
-  -----------------------------------------------------------------------
+```
+scaning_path: /scanning
+```
+
+An example config file can be found in the make-batch-dirs.conf-sample file.
+
 
 ## Usage:
 
-Script Usage Example:
+Script Usage Examples:
+  |Type|Example|
+  |:--- |:--- |
+  |Spreadsheet|make-batch-dirs --config_file config.conf --xls-file input_spreadsheet.xls --log-file log.txt --batch-name MyNewBatch|
+  |Google Sheet|make-batch-dirs --config_file config.conf --log-file log.txt --batch-name MyNewBatch --use_google {true\\|false} --google-sheet-id {sheet id} --google-sheet-name {E.g. 'Sheet1'} --google-creds-file {path to credentials file.}|
 
-make-batch-dirs ---config_file config.conf ---xls-file
-input_spreadsheet.xls ---batch-name MyNewBatch
 
 ## Function:
 
-For each row in the spreadsheet, obtain the first column contents which
-should be the 'id' column and construct a new directory structure in the
-format of {scanning_path}/{batch-name}/{id}.
+For each row in the spreadsheet, obtain the 'id' column contents and construct a new directory structure in the format of {scanning_path}/{batch-name}/{id}.
 
 E.g. Result: /scanning/MyNewBatch/317350000001,
 /scanning/MyNewBatch/317350000002, /scanning/MyNewBatch/317350000003
