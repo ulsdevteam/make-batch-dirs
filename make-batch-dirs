@@ -135,6 +135,26 @@ def make_dirs_from_df(df:pd.DataFrame, batch_path):
             except OSError as error:
                 logger.warning(f"Warning: {object_path} - {error}.")
 
+def write_df_to_excel(df: pd.DataFrame, filepath: str, sheet_name: str = "Sheet1"):
+    """
+    Write a pandas DataFrame to an Excel (.xlsx) file.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to write.
+    filepath : str
+        Path to the output .xlsx file.
+    sheet_name : str, optional
+        Name of the Excel sheet (default is 'Sheet1').
+    """
+    try:
+        with pd.ExcelWriter(filepath, engine="xlsxwriter") as writer:
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+        logger.info(f"DataFrame successfully written to {filepath}")
+    except Exception as e:
+        logger.error(f"Error writing Excel file: {e}")
+
 #
 # Main function.
 #
@@ -192,6 +212,7 @@ def main():
             sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
             df = sheet.read()
             batch_path = create_batch_folder(scanning_path, batch_name)
+            write_df_to_excel(df,os.path.sep.join([scanning_path, batch_name, "manifest.xlsx"]),args.google_sheet_name)
             make_dirs_from_df(df,batch_path)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
