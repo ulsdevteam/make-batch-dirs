@@ -154,6 +154,23 @@ def write_df_to_excel(df: pd.DataFrame, filepath: str, sheet_name: str = "Sheet1
         logger.info(f"DataFrame successfully written to {filepath}")
     except Exception as e:
         logger.error(f"Error writing Excel file: {e}")
+        
+def write_df_to_csv(df: pd.DataFrame, filepath: str):
+    """
+    Write a pandas DataFrame to a CSV file.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to write.
+    filepath : str
+        Path to the output .csv file.
+    """
+    try:
+        df.to_csv(filepath, index=False)
+        logger.info(f"DataFrame successfully written to {filepath}")
+    except Exception as e:
+        logger.error(f"Error writing CSV file: {e}")
 
 #
 # Main function.
@@ -212,7 +229,12 @@ def main():
             sheet = manager.sheet(args.google_sheet_id, args.google_sheet_name)
             df = sheet.read()
             batch_path = create_batch_folder(scanning_path, batch_name)
+            # Write to xlsx and csv locally for record keeping.
+            logger.info(f"Storing local copy of Google Sheet as xlsx and csv file.")
             write_df_to_excel(df,os.path.sep.join([scanning_path, batch_name, "manifest.xlsx"]),args.google_sheet_name)
+            write_df_to_csv(df,os.path.sep.join([scanning_path, batch_name, "manifest.csv"]))
+            # Make directories
+            logger.info(f"Creating Batch folder: {scanning_path}/{batch_name}")
             make_dirs_from_df(df,batch_path)
         else:
             logger.error(f"Error: Google arguments are required when using Google Sheets.")
