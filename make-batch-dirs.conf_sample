@@ -5,3 +5,6 @@
 # scanning_path - where is your scanning directory.
 scanning_path: 
 
+# id_column - the column name containing object identifiers.
+id_column:
+
